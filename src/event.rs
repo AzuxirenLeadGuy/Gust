@@ -1,50 +1,47 @@
 //! Module to handle keyboard and mouse event one day
-use glfw;
-pub use glfw::WindowEvent as Events;
-use std::rc::Rc;
-use std::sync::mpsc::Receiver;
-use window::Window;
+use crate::window::Window;
+use glfw::{self, GlfwReceiver};
 
 #[macro_export]
 /// Should expand from pressed!(W) -> Events::Key(Key::W, _, Action::Pressed, _)
 macro_rules! pressed {
     ($x:ident) => {
-        Events::Key(Key::$x, _, Action::Press, _)
-    }
+        glfw::WindowEvent::Key(Key::$x, _, Action::Press, _)
+    };
 }
 
 #[macro_export]
 macro_rules! release {
     ($x:ident) => {
-        Events::Key(Key::$x, _, Action::Release, _)
-    }
+        glfw::WindowEvent::Key(Key::$x, _, Action::Release, _)
+    };
 }
 
 #[macro_export]
 macro_rules! repeat {
     ($x:ident) => {
-        Events::Key(Key::$x, _, Action::Repeat, _)
-    }
+        glfw::WindowEvent::Key(Key::$x, _, Action::Repeat, _)
+    };
 }
 
-pub type EventMessage<'a> = glfw::FlushedMessages<'a, (f64, Events)>;
+pub type EventMessage<'a> = glfw::FlushedMessages<'a, (f64, glfw::WindowEvent)>;
 
 /// Event Wrap glfwEvent data
-pub type Event = (f64, Events);
-pub type EventReceiver = Rc<Receiver<(f64, glfw::WindowEvent)>>;
+pub type Event = (f64, glfw::WindowEvent);
+pub type EventReceiver = GlfwReceiver<(f64, glfw::WindowEvent)>;
 
-pub struct EventHandler {
-    receiver: EventReceiver,
+pub struct EventHandler<'a> {
+    receiver: &'a EventReceiver,
 }
 
-impl EventHandler {
-    pub fn new(window: &Window) -> EventHandler {
+impl<'a> EventHandler<'a> {
+    pub fn new(window: &Window) -> EventHandler<'_> {
         EventHandler {
-            receiver: Rc::clone(window.event()),
+            receiver: window.event(),
         }
     }
 
-    pub fn fetch(&self) -> EventIterator {
+    pub fn fetch(&self) -> EventIterator<'_> {
         EventIterator::from(&*self)
     }
 }
@@ -62,10 +59,10 @@ pub struct EventIterator<'a> {
     fmsg: EventMessage<'a>,
 }
 
-impl<'a> From<&'a EventHandler> for EventIterator<'a> {
+impl<'a, 'b> From<&'a EventHandler<'b>> for EventIterator<'a> {
     fn from(var: &'a EventHandler) -> EventIterator<'a> {
         EventIterator {
-            fmsg: glfw::flush_messages(&var.receiver),
+            fmsg: glfw::flush_messages(var.receiver),
         }
     }
 }

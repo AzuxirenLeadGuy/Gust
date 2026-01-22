@@ -10,43 +10,44 @@ static DEFAULT_WIDTH: u32 = 1600;
 extern crate gl;
 extern crate glfw;
 
-use color::Color;
-use draw;
-use draw::{Drawable, DrawableMut, Drawer};
-use event::{EventReceiver, EventType};
-use glfw::Context;
+use std::sync::LazyLock;
+
+use glfw::{Context, Glfw, GlfwReceiver};
 use nalgebra;
 use nalgebra::Matrix4;
-use rect::Rect;
-use std::rc::Rc;
-use std::sync::mpsc::Receiver;
-use std::sync::Mutex;
-use view::View;
-use Vector;
 
-static DEFAULT_FPS: u32 = 60;
+use crate::color::{self, Color};
+use crate::draw::{Drawable, DrawableMut, Drawer};
+use crate::event::{EventReceiver, EventType};
+use crate::rect::Rect;
+use crate::view::View;
+use crate::{Vector, draw};
 
-lazy_static! {
-    static ref DEFAULT_DELTA: f64 = 1.0 / f64::from(DEFAULT_FPS);
-}
+pub static DEFAULT_FPS: u32 = 60;
+
+pub static DEFAULT_DELTA: LazyLock<f64> = LazyLock::new(|| 1.0 / f64::from(DEFAULT_FPS));
 
 /// Window struct
 /// Define a struct by many thing in glfw
 pub struct Window {
     pub height: u32,
     pub width: u32,
-    event: Rc<Receiver<(f64, glfw::WindowEvent)>>,
-    pub(super) win: glfw::Window,
+    event: GlfwReceiver<(f64, glfw::WindowEvent)>,
+    pub(super) win: glfw::PWindow,
     clear_color: Color,
     already_init: bool,
     view: View,
     fps_limit: u32,
+    glfw_instance: Glfw,
 }
 
-lazy_static! {
-    static ref GLFW_INSTANCE: Mutex<glfw::Glfw> =
-        Mutex::new(glfw::init(glfw::FAIL_ON_ERRORS).unwrap());
-}
+// lazy_static! {
+//     static ref GLFW_INSTANCE: Mutex<glfw::Glfw> =
+//         Mutex::new(glfw::init(glfw::fail_on_errors).unwrap());
+// }
+
+// static LAZYVAL:LazyLock<String> = LazyLock::new(||{"Hwllo".to_string()});
+// LazyLock::new(|| glfw::init(glfw::fail_on_errors).unwrap());
 
 /// Window structure implementation
 impl<'a> Window {
@@ -54,7 +55,7 @@ impl<'a> Window {
     pub fn new(width: u32, height: u32, name: &str) -> Window {
         // Init the glfw system
 
-        let mut glfw = GLFW_INSTANCE.lock().unwrap();
+        let mut glfw = glfw::init(glfw::fail_on_errors).unwrap();
 
         glfw.window_hint(glfw::WindowHint::ContextVersion(3, 3));
         glfw.window_hint(glfw::WindowHint::OpenGlProfile(
@@ -69,7 +70,10 @@ impl<'a> Window {
             .unwrap();
 
         // Load all the gl function from the user configuration
-        gl::load_with(|s| win.get_proc_address(s) as *const _);
+        gl::load_with(|s| {
+            let address = win.get_proc_address(s).unwrap();
+            address as *const _
+        });
         win.set_cursor_mode(glfw::CursorMode::Normal);
 
         unsafe {
@@ -86,16 +90,19 @@ impl<'a> Window {
             height,
             width,
             win,
-            event: Rc::new(evt),
-            clear_color: Color::new(1.0, 1.0, 1.0),
+            event: evt,
+            clear_color: color::BLACK,
             already_init: true,
             fps_limit: self::DEFAULT_FPS,
+            glfw_instance: glfw,
         }
     }
 
     pub fn set_mouse_pos<T: nalgebra::Scalar + Into<f32>>(&mut self, vec: Vector<T>) {
-        self.win
-            .set_cursor_pos(f64::from(vec.x.into()), f64::from(vec.y.into()))
+        self.win.set_cursor_pos(
+            f64::from(vec.x.clone().into()),
+            f64::from(vec.y.clone().into()),
+        )
     }
 
     pub fn poll<T: Into<Option<EventType>>>(&mut self, event: T) {
@@ -155,7 +162,7 @@ impl<'a> Window {
 
     /// Poll the event
     pub fn poll_events(&mut self) {
-        GLFW_INSTANCE.lock().unwrap().poll_events();
+        self.glfw_instance.poll_events();
     }
 
     /// Set clear color
@@ -183,10 +190,7 @@ impl<'a> Window {
 
     /// Activate window on OpenGl context
     pub fn active(&mut self) -> bool {
-        GLFW_INSTANCE
-            .lock()
-            .unwrap()
-            .make_context_current(Some(&self.win));
+        self.glfw_instance.make_context_current(Some(&self.win));
         true
     }
 
@@ -302,34 +306,7 @@ impl Drawer for Window {
 /// Default trait implementation for window
 impl Default for Window {
     fn default() -> Window {
-        let (mut win, evt) = GLFW_INSTANCE
-            .lock()
-            .unwrap()
-            .create_window(
-                DEFAULT_HEIGHT as u32,
-                DEFAULT_WIDTH as u32,
-                "Gust",
-                glfw::WindowMode::Windowed,
-            )
-            .unwrap();
-
-        gl::load_with(|s| win.get_proc_address(s) as *const _);
-
-        Window {
-            view: View::from(Rect::new(
-                0.0,
-                0.0,
-                DEFAULT_WIDTH as f32,
-                DEFAULT_HEIGHT as f32,
-            )),
-            height: DEFAULT_HEIGHT,
-            width: DEFAULT_WIDTH,
-            win,
-            event: Rc::new(evt),
-            clear_color: Color::new(1.0, 1.0, 1.0),
-            already_init: true,
-            fps_limit: self::DEFAULT_FPS,
-        }
+        Window::new(DEFAULT_WIDTH, DEFAULT_HEIGHT, "Gust")
     }
 }
 

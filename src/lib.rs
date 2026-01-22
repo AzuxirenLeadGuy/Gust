@@ -69,15 +69,13 @@
 //! ```
 
 #![allow(dead_code)]
-#![feature(test)]
 
 extern crate freetype;
 extern crate gl;
 extern crate glfw;
 extern crate nalgebra;
-#[macro_use]
-extern crate lazy_static;
-extern crate alga;
+// #[macro_use]
+// extern crate lazy_static;
 extern crate image;
 
 pub mod color;
@@ -101,17 +99,6 @@ pub mod window;
 
 pub mod prelude {
     pub use super::{Action, Coord, Key, MouseButtonLeft, MouseButtonRight, Point, Vector};
-    pub use color::Color;
-    pub use draw::{Context, Drawable, DrawableMut, Drawer};
-    pub use event::{Event, EventHandler, Events};
-    pub use font::Font;
-    pub use sprite::Sprite;
-    pub use spritebatch::{SpriteBatch, SpriteData};
-    pub use text::Text;
-    pub use texture::Texture;
-    pub use transform::{Movable, Rotable, Scalable, Transformable};
-    pub use view::View;
-    pub use window::Window;
 }
 
 pub use glfw::Action;

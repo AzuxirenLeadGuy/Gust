@@ -35,7 +35,7 @@ impl GlError {
 }
 
 impl Error for GlError {
-    fn cause(&self) -> Option<&Error> {
+    fn cause(&self) -> Option<&dyn Error> {
         None
     }
 }

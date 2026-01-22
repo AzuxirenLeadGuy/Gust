@@ -5,15 +5,20 @@
 //  module:
 //! font datastructures and fonctions made from Font.cpp of SFML
 
+use crate::{
+    rect::Rect,
+    texture::{RgbMode, Texture},
+    Vector,
+};
+
 use self::ft::{
     bitmap::PixelMode,
     face::{Face, LoadFlag},
     library::Library,
 };
-use super::Vector;
-use rect::Rect;
+// use rect::Rect;
 use std::{collections::HashMap, error::Error, fmt};
-use texture::{RgbMode, Texture};
+// use texture::{RgbMode, Texture};
 
 extern crate freetype as ft;
 
@@ -82,7 +87,7 @@ impl GlyphMap {
     pub fn get_texture_rect(&mut self, width: u32, height: u32) -> Rect<u32> {
         let mut ret: Option<Rect<u32>> = None;
         // Iter over all element
-        for mut row in self.rows.iter_mut() {
+        for row in self.rows.iter_mut() {
             if (row.width + width > self.texture.width()) || (row.height < height) {
                 continue;
             }
@@ -118,13 +123,17 @@ impl GlyphMap {
     }
 
     /// Create a new texture from Utf8Map
-    pub fn update_texture(&mut self, char_info: &CharInfo, data: &[u8]) -> Result<(), Box<Error>> {
+    pub fn update_texture(
+        &mut self,
+        char_info: &CharInfo,
+        data: &[u8],
+    ) -> Result<(), Box<dyn Error>> {
         self.texture.update_block(
             data,
             Vector::new(char_info.tex_coord.width, char_info.tex_coord.height),
             Vector::new(char_info.tex_coord.left, char_info.tex_coord.top),
             RgbMode::RGBA,
-        )?;
+        ).unwrap();
         Ok(())
     }
 }
@@ -222,13 +231,13 @@ impl Font {
 
     /// Create a glyph if the previously asked isn't already created.
     /// Heavy fonction.
-    fn create_glyph<'a>(&'a mut self, size: u32, code: u32) -> Result<&'a CharInfo, Box<Error>> {
+    fn create_glyph<'a>(&'a mut self, size: u32, code: u32) -> Result<&'a CharInfo, Box<dyn Error>> {
         {
             // Get the glyph map
             let glyph_map = self.map.entry(size).or_insert_with(GlyphMap::new);
 
             // Load the right glyph
-            self.face.load_char(code as usize, LoadFlag::RENDER)?;
+            self.face.load_char(code as usize, LoadFlag::RENDER).unwrap();
 
             let metrics = self.face.glyph().metrics();
             let bitmap = self.face.glyph().bitmap();
@@ -338,7 +347,7 @@ impl fmt::Display for TextError {
 }
 
 impl Error for TextError {
-    fn cause(&self) -> Option<&Error> {
+    fn cause(&self) -> Option<&dyn Error> {
         match self {
             TextError::NoTexture => None,
         }

@@ -7,6 +7,7 @@
 
 use nalgebra::Scalar;
 use std::ops::{Add, Div, Mul, MulAssign, Sub};
+use crate::Point;
 
 /// Rect define a rectangle with down/left coord and width/height
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -97,11 +98,11 @@ where
         }
     }
 
-    pub fn contain(&self, point: super::Point<T>) -> bool {
-        point.x > self.left
-            && point.x < self.left + self.width
-            && point.y > self.top
-            && point.y < self.top + self.height
+    pub fn contain(&self, point: Point<T>) -> bool {
+        point.x > self.left.clone()
+            && point.x < (self.left.clone() + self.width.clone())
+            && point.y > self.top.clone()
+            && point.y < self.top.clone() + self.height.clone()
     }
 }
 

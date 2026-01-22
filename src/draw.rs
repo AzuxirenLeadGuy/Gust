@@ -1,12 +1,14 @@
 //! Every traits needed by drawable object
 //!
 
+use std::sync::LazyLock;
+
+use crate::shader::DEFAULT_SHADER;
+use crate::shader::Shader;
+use crate::texture::Texture;
 use gl;
 use nalgebra::Matrix4;
 use nalgebra::Vector2;
-use shader::Shader;
-use shader::DEFAULT_SHADER;
-use texture::Texture;
 
 //----------------------------------------------------------------------------
 //
@@ -16,13 +18,8 @@ use texture::Texture;
 //
 //----------------------------------------------------------------------------
 
-lazy_static! {
-    static ref DEFAULT_CONTEXT: Context<'static> = Context::default();
-}
-
-lazy_static! {
-    pub static ref IDENTITY: Matrix4<f32> = Matrix4::identity();
-}
+pub static DEFAULT_CONTEXT: LazyLock<Context<'static>> = LazyLock::new(|| Context::default());
+pub static IDENTITY: LazyLock<Matrix4<f32>> = LazyLock::new(|| Matrix4::identity());
 
 #[derive(Debug)]
 /// Blend mode needed to draw

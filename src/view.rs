@@ -18,8 +18,8 @@
 
 use nalgebra;
 use nalgebra::Matrix4;
-use rect::Rect;
-use {Point, Vector};
+use crate::{Point, Vector};
+use crate::rect::Rect;
 
 /// A View is a 2D camera.
 /// It's the screen viewport.
@@ -92,8 +92,8 @@ impl View {
 
     /// Move the view from actual position with the offset `offset`.
     pub fn translate<T: nalgebra::Scalar + Into<f32>>(&mut self, offset: Vector<T>) {
-        self.pos.x += offset.x.into();
-        self.pos.y += offset.y.into();
+        self.pos.x += offset.x.clone().into();
+        self.pos.y += offset.y.clone().into();
         self.need_update = true;
     }
 

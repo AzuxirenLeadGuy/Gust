@@ -4,13 +4,17 @@
 //  text.rs
 //  module:
 //! text render utils
-use color::Color;
-use draw::{BlendMode, Context, Drawable, DrawableMut, Drawer, IDENTITY};
-use font::{CharInfo, Font};
 use nalgebra::Scalar;
-use shader;
 use std::cell::RefCell;
 use std::{error::Error, rc::Rc};
+use crate::color::{self};
+use crate::draw::{BlendMode, Context, Drawable, DrawableMut, Drawer, IDENTITY};
+use crate::transform::{Movable, Rotable, Scalable, Transformable};
+use crate::vertex::Vertex;
+use crate::{Point, Vector, shader};
+use crate::font::{CharInfo, Font};
+use crate::texture::Texture;
+use crate::vertex_buffer::VertexBuffer;
 /// # How to use
 /// ```no_run
 /// use gust::text::Text;
@@ -32,13 +36,8 @@ use std::{error::Error, rc::Rc};
 /// }
 /// ```
 /// It's made from the Text system of the C++ library SFML.
-use texture::Texture;
-use transform::*;
-use vertex::Vertex;
-use vertex_buffer::VertexBuffer;
-use {Point, Vector};
 
-extern crate freetype as ft;
+// extern crate freetype as ft;
 
 #[derive(Debug)]
 /// # Text struct
@@ -56,12 +55,12 @@ pub struct Text {
 
 impl Text {
     /// Dump the font texture to a file
-    pub fn dump_texture(&mut self) -> Result<(), Box<Error>> {
+    pub fn dump_texture(&mut self) -> Result<(), Box<dyn Error>> {
         // Get the texture
         let font_ref = self.font.try_borrow().unwrap();
         let texture = font_ref.texture(self.actual_size).unwrap();
 
-        texture.to_file("font_dump.png")?;
+        texture.to_file("font_dump.png").unwrap();
         Ok(())
     }
 
@@ -187,8 +186,8 @@ impl Movable for Text {
     where
         T: Scalar + Into<f32>,
     {
-        self.pos.x += offset.x.into();
-        self.pos.y += offset.y.into();
+        self.pos.x += offset.x.clone().into();
+        self.pos.y += offset.y.clone().into();
         self.need_update = true;
     }
 
@@ -196,8 +195,8 @@ impl Movable for Text {
     where
         T: Scalar + Into<f32>,
     {
-        self.pos.x = pos.x.into();
-        self.pos.y = pos.y.into();
+        self.pos.x = pos.x.clone().into();
+        self.pos.y = pos.y.clone().into();
         self.need_update = true;
     }
 
@@ -348,32 +347,32 @@ fn get_vertice_letter(
         Vertex::new(
             Vector::new(x + left, y + top),
             Vector::new(u1, v1),
-            Color::white(),
+            color::WHITE,
         ),
         Vertex::new(
             Vector::new(x + left, y + bottom),
             Vector::new(u1, v2),
-            Color::white(),
+            color::WHITE,
         ),
         Vertex::new(
             Vector::new(x + right, y + bottom),
             Vector::new(u2, v2),
-            Color::white(),
+            color::WHITE,
         ),
         Vertex::new(
             Vector::new(x + left, y + top),
             Vector::new(u1, v1),
-            Color::white(),
+            color::WHITE,
         ),
         Vertex::new(
             Vector::new(x + right, y + bottom),
             Vector::new(u2, v2),
-            Color::white(),
+            color::WHITE,
         ),
         Vertex::new(
             Vector::new(x + right, y + top),
             Vector::new(u2, v1),
-            Color::white(),
+            color::WHITE,
         ),
     ]
 }

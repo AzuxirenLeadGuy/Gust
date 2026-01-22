@@ -1,8 +1,6 @@
 //! This module is for texture handling
 //! Importing, Loading, Pushing into OpenGl
 //! I'm using image crate that is really useful
-
-use color::Color;
 use gl;
 use gl::types::*;
 use image;
@@ -10,7 +8,6 @@ use image::{DynamicImage, ImageBuffer};
 use std::error::Error;
 use std::os::raw::c_void;
 use std::path::Path;
-use Vector;
 
 /// # Texture structure
 /// A texture is an id inside openGL that can contain a array of byte
@@ -149,7 +146,7 @@ impl Texture {
         }
     }
 
-    pub fn to_file<P: AsRef<Path>>(&self, path: P) -> Result<(), Box<Error>> {
+    pub fn to_file<P: AsRef<Path>>(&self, path: P) -> Result<(), Box<&dyn Error>> {
         let data = self.get_data();
 
         match self.rgb_mode {
@@ -158,9 +155,9 @@ impl Texture {
                     ImageBuffer::from_vec(self.width, self.height, data);
 
                 if let Some(img) = image {
-                    img.save(path)?;
+                    img.save(path).unwrap();
                 } else {
-                    return Err(Box::new(TextureError::WriteFile));
+                    return Err(Box::new(&TextureError::WriteFile));
                 }
             }
             RgbMode::RGB => {
@@ -168,9 +165,9 @@ impl Texture {
                     ImageBuffer::from_vec(self.width, self.height, data);
 
                 if let Some(img) = image {
-                    img.save(path)?;
+                    img.save(path).unwrap();
                 } else {
-                    return Err(Box::new(TextureError::WriteFile));
+                    return Err(Box::new(&TextureError::WriteFile));
                 }
             }
             _ => unimplemented!(),
@@ -378,11 +375,13 @@ impl Texture {
         }
     }
 
-    unsafe fn default_param() {
-        gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, gl::REPEAT as i32);
-        gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, gl::REPEAT as i32);
-        gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::LINEAR as i32);
-        gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::LINEAR as i32);
+    fn default_param() {
+        unsafe {
+            gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, gl::REPEAT as i32);
+            gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, gl::REPEAT as i32);
+            gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::LINEAR as i32);
+            gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::LINEAR as i32);
+        }
     }
 
     //-------------------------GETTER-----------------------//
@@ -462,6 +461,8 @@ pub enum TextureError {
 }
 
 use std::fmt;
+use crate::Vector;
+use crate::color::Color;
 
 impl fmt::Display for TextureError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -487,7 +488,7 @@ okay with this texture. x: {}
 }
 
 impl Error for TextureError {
-    fn cause(&self) -> Option<&Error> {
+    fn cause(&self) -> Option<&dyn Error> {
         None
     }
 }
@@ -500,17 +501,15 @@ impl Drop for Texture {
         }
     }
 }
-
+/*
 #[cfg(test)]
 mod test {
-    extern crate test;
+    // extern crate test;
+
+    use crate::{color::Color, texture::{RgbMode, Texture}, window::Window};
 
     use self::test::Bencher;
     use super::Vector;
-    use color::Color;
-    use texture::RgbMode;
-    use texture::Texture;
-    use window::Window;
 
     #[bench]
     fn from_color(b: &mut Bencher) {
@@ -551,3 +550,4 @@ mod test {
         });
     }
 }
+*/

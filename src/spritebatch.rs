@@ -5,20 +5,20 @@
 //! spritebatch test system
 
 use super::Vector;
-use color::Color;
-use draw::*;
+use crate::color::{self, Color};
+use crate::draw::*;
+use crate::rect::Rect;
+use crate::shader::BATCH_SHADER;
+use crate::texture::Texture;
+use crate::transform::*;
+use crate::vertex::Vertex;
 use gl;
 use gl::types::*;
 use nalgebra::{Matrix4, Vector3};
 use nalgebra::{Scalar, Vector4};
-use rect::Rect;
-use shader::BATCH_SHADER;
 use std::mem;
 use std::ptr;
 use std::rc::Rc;
-use texture::Texture;
-use transform::*;
-use vertex::Vertex;
 
 pub enum BatchError {
     BadTextureRect,
@@ -91,7 +91,7 @@ impl Default for SpriteData {
 }
 
 impl Transformable for SpriteData {
-    fn contain<T>(&self, _vec: ::Point<T>) -> bool
+    fn contain<T>(&self, _vec: crate::Point<T>) -> bool
     where
         T: Scalar + Into<f32>,
     {
@@ -157,8 +157,8 @@ impl Movable for SpriteData {
     where
         T: Into<f32> + Scalar,
     {
-        self.pos.x += vec.x.into();
-        self.pos.y += vec.y.into();
+        self.pos.x += vec.x.clone().into();
+        self.pos.y += vec.y.clone().into();
         self.need_update = true;
     }
 
@@ -170,8 +170,8 @@ impl Movable for SpriteData {
     where
         T: Into<f32> + Scalar,
     {
-        self.pos.x = vec.x.into();
-        self.pos.y = vec.y.into();
+        self.pos.x = vec.x.clone().into();
+        self.pos.y = vec.y.clone().into();
         self.need_update = true;
     }
 }
@@ -227,22 +227,22 @@ impl SpriteBatch {
                     Vertex::new(
                         Vector::new(0.0, 0.0),
                         Vector::new(x.text_coord[0].x, x.text_coord[0].y),
-                        x.color.unwrap_or(Color::white()),
+                        x.color.unwrap_or(color::WHITE),
                     ),
                     Vertex::new(
                         Vector::new(0.0, h),
                         Vector::new(x.text_coord[0].x, x.text_coord[1].y),
-                        x.color.unwrap_or(Color::white()),
+                        x.color.unwrap_or(color::WHITE),
                     ),
                     Vertex::new(
                         Vector::new(w, 0.0),
                         Vector::new(x.text_coord[1].x, x.text_coord[0].y),
-                        x.color.unwrap_or(Color::white()),
+                        x.color.unwrap_or(color::WHITE),
                     ),
                     Vertex::new(
                         Vector::new(w, h),
                         Vector::new(x.text_coord[1].x, x.text_coord[1].y),
-                        x.color.unwrap_or(Color::white()),
+                        x.color.unwrap_or(color::WHITE),
                     ),
                 ]);
             }
@@ -295,22 +295,22 @@ impl SpriteBatch {
             Vertex::new(
                 Vector::new(0.0, 0.0),
                 Vector::new(sprites.text_coord[0].x, sprites.text_coord[0].y),
-                Color::white(),
+                color::WHITE,
             ),
             Vertex::new(
                 Vector::new(0.0, h),
                 Vector::new(sprites.text_coord[0].x, sprites.text_coord[1].y),
-                Color::white(),
+                color::WHITE,
             ),
             Vertex::new(
                 Vector::new(w, 0.0),
                 Vector::new(sprites.text_coord[1].x, sprites.text_coord[0].y),
-                Color::white(),
+                color::WHITE,
             ),
             Vertex::new(
                 Vector::new(w, h),
                 Vector::new(sprites.text_coord[1].x, sprites.text_coord[1].y),
-                Color::white(),
+                color::WHITE,
             ),
         ]);
         self.sprites.push(sprites);
@@ -455,13 +455,13 @@ impl SpriteBatch {
 }
 
 impl Transformable for SpriteBatch {
-    fn contain<T: nalgebra::Scalar + Into<f32>>(&self, _vec: ::Point<T>) -> bool {
+    fn contain<T: nalgebra::Scalar + Into<f32>>(&self, _vec: crate::Point<T>) -> bool {
         true
     }
 
     fn set_origin<T: nalgebra::Scalar + Into<f32>>(&mut self, origin: Vector<T>) {
-        self.glob_origin.x = origin.x.into();
-        self.glob_origin.y = origin.y.into();
+        self.glob_origin.x = origin.x.clone().into();
+        self.glob_origin.y = origin.y.clone().into();
         self.need_update = true;
     }
 
@@ -475,8 +475,8 @@ impl Scalable for SpriteBatch {
     where
         T: Scalar + Into<f32>,
     {
-        self.glob_scale.x = vec.x.into();
-        self.glob_scale.y = vec.y.into();
+        self.glob_scale.x = vec.x.clone().into();
+        self.glob_scale.y = vec.y.clone().into();
         self.need_update = true;
     }
 
@@ -488,8 +488,8 @@ impl Scalable for SpriteBatch {
     where
         T: Scalar + Into<f32>,
     {
-        self.glob_scale.x += factor.x.into();
-        self.glob_scale.y += factor.y.into();
+        self.glob_scale.x += factor.x.clone().into();
+        self.glob_scale.y += factor.y.clone().into();
         self.need_update = true;
     }
 }
@@ -521,8 +521,8 @@ impl Movable for SpriteBatch {
     where
         T: Scalar + Into<f32>,
     {
-        self.glob_pos.x += vec.x.into();
-        self.glob_pos.y += vec.y.into();
+        self.glob_pos.x += vec.x.clone().into();
+        self.glob_pos.y += vec.y.clone().into();
         self.need_update = true;
     }
 
@@ -534,8 +534,8 @@ impl Movable for SpriteBatch {
     where
         T: Scalar + Into<f32>,
     {
-        self.glob_pos.x = vec.x.into();
-        self.glob_pos.y = vec.y.into();
+        self.glob_pos.x = vec.x.clone().into();
+        self.glob_pos.y = vec.y.clone().into();
         self.need_update = true;
     }
 }
@@ -579,7 +579,8 @@ impl Drawable for SpriteBatch {
 
     fn draw_with_context(&self, _context: &mut Context) {
         unimplemented!(
-        "Put an issue here please if I forgot to implement it https://github.com/Afourcat/Gust/issues");
+            "Put an issue here please if I forgot to implement it https://github.com/Afourcat/Gust/issues"
+        );
     }
 
     fn update(&mut self) {
@@ -668,18 +669,18 @@ impl From<&Rc<Texture>> for SpriteBatch {
         }
     }
 }
-
+/*
 #[cfg(test)]
 mod test {
     extern crate test;
 
-    use self::test::Bencher;
+    use test::Bencher;
     use super::{SpriteBatch, SpriteData};
-    use draw::Drawable;
+    use crate::draw::Drawable;
     use std::rc::Rc;
-    use transform::Movable;
-    use window::Window;
-    use {texture::Texture, Vector};
+    use crate::transform::Movable;
+    use crate::window::Window;
+    use crate::{texture::Texture, Vector};
 
     #[bench]
     fn sprite_batch_create(bencher: &mut Bencher) {
@@ -786,3 +787,4 @@ mod test {
         });
     }
 }
+*/

@@ -3,7 +3,7 @@
 //! You can attach these trait to anything that you need to move.
 
 use nalgebra::Scalar;
-use Vector;
+use crate::Vector;
 
 /// A trait that define something fully transformable.
 pub trait Transformable: Movable + Rotable + Scalable {

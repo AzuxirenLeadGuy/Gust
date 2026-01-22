@@ -7,13 +7,11 @@ use std::ops::Sub;
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Color(pub f32, pub f32, pub f32, pub f32);
 
-lazy_static! {
-    static ref WHITE: Color = Color(1.0, 1.0, 1.0, 1.0);
-    static ref BLACK: Color = Color(0.0, 0.0, 0.0, 1.0);
-    static ref RED: Color = Color(1.0, 0.0, 0.0, 1.0);
-    static ref GREEN: Color = Color(0.0, 1.0, 0.0, 1.0);
-    static ref BLUE: Color = Color(0.0, 0.0, 1.0, 1.0);
-}
+pub const WHITE: Color = Color(1., 1., 1., 1.);
+pub const BLACK: Color = Color(0., 0., 0., 1.);
+pub const RED: Color = Color(1., 0., 0., 1.);
+pub const GREEN: Color = Color(0., 1., 0., 1.);
+pub const BLUE: Color = Color(1., 0., 1., 1.);
 
 /// Color class
 impl Color {
@@ -25,26 +23,6 @@ impl Color {
     /// Create a new color
     pub fn new(r: f32, g: f32, b: f32) -> Color {
         Color(r, g, b, 1.0)
-    }
-
-    pub fn white() -> Color {
-        *self::WHITE
-    }
-
-    pub fn red() -> Color {
-        Color(1.0, 0.0, 0.0, 1.0)
-    }
-
-    pub fn green() -> Color {
-        Color(0.0, 1.0, 0.0, 1.0)
-    }
-
-    pub fn blue() -> Color {
-        Color(0.0, 0.0, 1.0, 1.0)
-    }
-
-    pub fn black() -> Color {
-        Color(0.0, 0.0, 0.0, 1.0)
     }
 }
 
@@ -119,7 +97,7 @@ impl Default for Color {
 
 #[cfg(test)]
 mod test {
-    use color::Color;
+    use crate::color::Color;
 
     #[test]
     fn color_new() {

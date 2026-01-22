@@ -1,14 +1,10 @@
-use crate::Vector;
-use color::Color;
-use draw::*;
+use crate::{Vector, color::Color, draw::{Drawable, Drawer}, view::View, window::Window};
 use glfw::Context;
 use nalgebra::Matrix4;
-use view::View;
-use window::Window;
 
 /// Shared Window is a window that can be shared between thread.
 pub struct SharedWindow {
-    context: glfw::RenderContext,
+    context: glfw::PRenderContext,
     view: View,
 }
 

@@ -1,15 +1,14 @@
 //! This module encapsulate the system of vertexBuffer
 //! Here you can create a drawable object easily with a VertexArray
-
-use draw::{BlendMode, Context, Drawable, DrawableMut, Drawer, IDENTITY};
 use gl;
 use gl::types::*;
-use resources::Resource;
-use shader::*;
 use std;
 use std::ops::{Index, IndexMut};
-use texture::Texture;
-use vertex::*;
+use crate::Resource;
+use crate::draw::{BlendMode, Context, Drawable, DrawableMut, Drawer, IDENTITY};
+use crate::shader::{DEFAULT_SHADER, NO_TEXTURE_SHADER};
+use crate::texture::Texture;
+use crate::vertex::{Vertex, VertexArray};
 
 /// Vertex Buffer structure
 #[derive(Debug, Clone, PartialEq)]

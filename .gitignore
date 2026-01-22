@@ -1,10 +1,2 @@
-
-gust/target
-gust_example/target
-gust/**/*.rs.bk
-gust_example/**/*.rs.bk
-
-./**/*.rs.bk
 target/
-
-.vscode
+.vscode/

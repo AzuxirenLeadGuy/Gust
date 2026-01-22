@@ -1,0 +1,4 @@
+force_multiline_blocks=true
+imports_layout = "Vertical"
+match_block_trailing_comma = true
+indent_style = "Block"

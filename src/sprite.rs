@@ -1,19 +1,17 @@
 //! Module to handle drawable texture that are called Sprite
 
-use color::Color;
-use draw::{BlendMode, Context, Drawable, DrawableMut, Drawer};
-use nalgebra;
+use crate::color::Color;
+use crate::draw::{BlendMode, Context, Drawable, DrawableMut, Drawer};
+use crate::shader::DEFAULT_SHADER;
+use crate::texture::Texture;
+use crate::transform::{Movable, Rotable, Scalable, Transformable};
+use crate::vertex::{Vertex, VertexArray};
+use crate::vertex_buffer::{Primitive, VertexBuffer};
+use crate::{Resource, color};
 use nalgebra::*;
-use resources::Resource;
-use shader::DEFAULT_SHADER;
 use std::convert::From;
 use std::error::Error;
 use std::fmt;
-use texture::Texture;
-use transform::{Movable, Rotable, Scalable, Transformable};
-use vertex::Vertex;
-use vertex::*;
-use vertex_buffer::{Primitive, VertexBuffer};
 
 /// A sprite is a transformable
 /// drawable sprite
@@ -129,25 +127,21 @@ impl<'a> From<&'a Resource<Texture>> for Sprite {
                 Primitive::TrianglesStrip,
                 VertexArray::from(
                     vec![
-                        Vertex::new(
-                            Vector2::new(0.0, 0.0),
-                            Vector2::new(0.0, 0.0),
-                            Color::white(),
-                        ),
+                        Vertex::new(Vector2::new(0.0, 0.0), Vector2::new(0.0, 0.0), color::WHITE),
                         Vertex::new(
                             Vector2::new(0.0, height),
                             Vector2::new(0.0, 1.0),
-                            Color::white(),
+                            color::WHITE,
                         ),
                         Vertex::new(
                             Vector2::new(width, 0.0),
                             Vector2::new(1.0, 0.0),
-                            Color::white(),
+                            color::WHITE,
                         ),
                         Vertex::new(
                             Vector2::new(width, height),
                             Vector2::new(1.0, 1.0),
-                            Color::white(),
+                            color::WHITE,
                         ),
                     ]
                     .as_slice(),
@@ -164,7 +158,7 @@ impl<'a> From<&'a Resource<Texture>> for Sprite {
 
 impl Transformable for Sprite {
     /// TODO: Transform the point tested.
-    fn contain<T: nalgebra::Scalar + Into<f32>>(&self, _point: ::Point<T>) -> bool {
+    fn contain<T: nalgebra::Scalar + Into<f32>>(&self, _point: crate::Point<T>) -> bool {
         //let sizes = self.get_sizes();
         //let b: Vector4<f32> = Matrix4::inverse(self.model) * Vector4::new(point.x.into(), point.y.into(), 0.0, 1.0);
         //let vec: Vector2<f32> = Vector2::new(b.x, b.y);
@@ -177,8 +171,8 @@ impl Transformable for Sprite {
     }
 
     fn set_origin<T: nalgebra::Scalar + Into<f32>>(&mut self, origin: Vector2<T>) {
-        self.origin.x = origin.x.into();
-        self.origin.y = origin.y.into();
+        self.origin.x = origin.x.clone().into();
+        self.origin.y = origin.y.clone().into();
         self.need_update = true;
     }
 
@@ -192,8 +186,8 @@ impl Scalable for Sprite {
     where
         T: Scalar + Into<f32>,
     {
-        self.scale.x = vec.x.into();
-        self.scale.y = vec.y.into();
+        self.scale.x = vec.x.clone().into();
+        self.scale.y = vec.y.clone().into();
         self.need_update = true;
     }
 
@@ -205,8 +199,8 @@ impl Scalable for Sprite {
     where
         T: Scalar + Into<f32>,
     {
-        self.scale.x += factor.x.into();
-        self.scale.y += factor.y.into();
+        self.scale.x += factor.x.clone().into();
+        self.scale.y += factor.y.clone().into();
         self.need_update = true;
     }
 }
@@ -238,8 +232,8 @@ impl Movable for Sprite {
     where
         T: Scalar + Into<f32>,
     {
-        self.pos.x += vec.x.into();
-        self.pos.y += vec.y.into();
+        self.pos.x += vec.x.clone().into();
+        self.pos.y += vec.y.clone().into();
         self.need_update = true;
     }
 
@@ -251,8 +245,8 @@ impl Movable for Sprite {
     where
         T: Scalar + Into<f32>,
     {
-        self.pos.x = vec.x.into();
-        self.pos.y = vec.y.into();
+        self.pos.x = vec.x.clone().into();
+        self.pos.y = vec.y.clone().into();
         self.need_update = true;
     }
 }
@@ -362,7 +356,7 @@ impl fmt::Display for SpriteError {
 }
 
 impl Error for SpriteError {
-    fn cause(&self) -> Option<&Error> {
+    fn cause(&self) -> Option<&dyn Error> {
         match self {
             SpriteError::NoTexture => None,
         }

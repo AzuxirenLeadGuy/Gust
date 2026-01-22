@@ -1,16 +1,13 @@
 [package]
 name = "gust"
 version = "0.2.0"
+edition = "2024"
 authors = ["alex <alexandre.fourcat@epitech.eu>"]
 autoexamples = true
 
 [dependencies]
-gl = "*"
-nalgebra = "*"
-image = "*"
-lazy_static = "*"
-freetype-rs = "*"
-rayon = "*"
-crossbeam = "*"
-alga = "*"
-glfw = "*"
+glfw = "0.61.0"
+gl = "0.14.0"
+nalgebra = "0.34.1"
+image = "0.25.9"
+freetype-rs = "0.38.0"

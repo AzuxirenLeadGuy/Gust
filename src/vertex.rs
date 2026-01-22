@@ -43,13 +43,13 @@
 //! VertexArray::new(vertice);
 //! ```
 
-use color::Color;
 use gl;
 use gl::types::*;
 use nalgebra::Vector2;
 use std::mem;
 use std::ops::{Index, IndexMut};
 use std::ptr;
+use crate::color::{self, Color};
 
 /// Vertex structure defined by texture coord, space coors and color
 #[derive(Debug, Clone, PartialEq, Copy)]
@@ -107,7 +107,7 @@ impl Default for Vertex {
         Vertex {
             pos: Vector2::new(0.0, 0.0),
             tex: Vector2::new(0.0, 0.0),
-            color: Color::white(),
+            color: color::WHITE,
         }
     }
 }
